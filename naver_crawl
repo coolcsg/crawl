@@ -1,0 +1,32 @@
+###  네이버 쇼핑몰 가상 웹페이지를 띄워서 탭버튼을 누르면서 후기의 제목을 크롤링 ###
+
+
+library(RSelenium)
+pJS <- wdman::phantomjs(port = 4567L)
+remDr <- remoteDriver(port=4567L, browserName = 'phantomjs')
+remDr$open()
+remDr$navigate("https://search.shopping.naver.com/detail/lite.nhn?cat_id=50000830&nv_mid=17922822184&NaPm=ct%3Djt6lof74%7Cci%3Dd0f5d6760fc51a8f23bb561aec4ab9ca1f73b3e4%7Ctr%3Dsl%7Csn%3D95694%7Chk%3D753d778af18ec21d7156bc15c9fd20ebc6b3c1c4")
+remDr$screenshot(display = T)
+
+
+txt <- "//div[@id='_review_paging']/a[text()="
+context <- c()
+for (i in 2:10) {
+  n = as.character(i)
+  webElem <- remDr$findElement(using = "xpath", value=paste0(txt, n, "]"))
+  #  webElem$clickElement()
+  webElem$sendKeysToElement(list(key = "enter"))
+  
+  remDr$screenshot(display = T)
+  # html <- remDr$getPageSource()[[1]]
+  # txt <- read_html(html)
+  temps <- remDr$findElements(using = "xpath", value = "//p[@class='subjcet']/strong")
+  temp2 <- NULL
+  for (v in 1:length(temps)) {
+    temp <- temps[[v]]
+    temp2 <- c(temp2, temp$getElementText())
+  }
+  context <- c(context, temp2)
+}
+
+remDr$close(); pJS$stop();
